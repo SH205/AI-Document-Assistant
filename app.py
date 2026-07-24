@@ -264,6 +264,13 @@ with tab1:
     if len(st.session_state.messages) == 0:
         st.info( "Ask a question or use one of the quick actions above.")
 
+# ---------------------------------------------------
+# Message
+# ---------------------------------------------------
+
+chat_container = st.container()
+
+with chat_container:
     # Display Chat History
     for message in st.session_state.messages:
         with st.chat_message(message["role"]):
@@ -271,25 +278,6 @@ with tab1:
             st.markdown(
                 message["content"],
                 unsafe_allow_html=True)
-
-
-# ---------------------------------------------------
-# Conversation
-# ---------------------------------------------------
-
-chat_container = st.container()
-
-with chat_container:
-
-    for message in st.session_state.messages:
-
-        with st.chat_message(message["role"]):
-
-            st.markdown(
-                message["content"],
-                unsafe_allow_html=True
-            )
-
 # ---------------------------------------------------
 # Question Input
 # ---------------------------------------------------
