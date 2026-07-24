@@ -1,8 +1,9 @@
 streamlit
-ollama
+groq
 faiss-cpu
 sentence-transformers
-pymupdf
+langchain-text-splitters
+PyMuPDF
 numpy
 torch
 transformers
