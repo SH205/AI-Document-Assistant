@@ -279,9 +279,11 @@ for message in st.session_state.messages:
 # Question Input
 # ---------------------------------------------------
 
-question = st.chat_input(
+typed_question = st.chat_input(
     "Ask a question about your uploaded documents..."
 )
+
+question = chat_question if chat_question else typed_question
 
 
 # ---------------------------------------------------
