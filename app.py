@@ -243,17 +243,69 @@ with tab1:
             "📖 Explain Main Concepts",
             use_container_width=True
         )
+    
+    if quick_question:
 
-    question = None
-
-    if summarize:
-        question = "Summarize the uploaded documents."
-
-    elif key_points:
-        question = "What are the most important points from the uploaded documents?"
-
-    elif explain:
-        question = "Explain the main concepts from the uploaded documents."
+        if st.session_state.pipeline is None:
+            st.warning("Please upload at least one PDF.")
+            st.stop()
+    
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": quick_question
+            }
+        )
+    
+        with st.status("Searching knowledge base...", expanded=True) as status:
+    
+            status.write("🔎 Searching vector database...")
+    
+            answer, sources = st.session_state.pipeline.ask(quick_question)
+    
+            status.write("🧠 Generating response...")
+    
+            status.update(label="Complete", state="complete")
+    
+        grouped_sources = {}
+    
+        for source in sources:
+            grouped_sources.setdefault(
+                source["filename"],
+                []
+            ).append(source["page"])
+    
+        source_html = ""
+    
+        for filename, pages in grouped_sources.items():
+    
+            pages = sorted(set(pages))
+    
+            source_html += f"""
+    <div class="chat-source">
+    <div class="source-title">📄 {filename}</div>
+    Pages: {", ".join(map(str, pages))}
+    </div>
+    """
+    
+        final_answer = f"""
+    <div class="answer-box">
+    
+    {answer}
+    
+    </div>
+    
+    {source_html}
+    """
+    
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": final_answer
+            }
+        )
+    
+        st.rerun()
 
 
     # ---------------------------------------------------
