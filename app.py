@@ -222,6 +222,8 @@ with tab1:
     # ---------------------------------------------------
     # Quick Actions
     # ---------------------------------------------------   
+    chat_question = None
+
     st.subheader("✨ Quick Actions")
 
     col1, col2, col3 = st.columns(3)
@@ -245,13 +247,13 @@ with tab1:
         )
     
     if summarize:
-        question = "Summarize the uploaded documents."
+        chat_question = "Summarize the uploaded documents."
     
     elif key_points:
-        question = "What are the most important points from the uploaded documents?"
+        chat_question = "What are the most important points from the uploaded documents?"
     
     elif explain:
-        question = "Explain the main concepts from the uploaded documents."
+        chat_question = "Explain the main concepts from the uploaded documents."
     
    
 # ---------------------------------------------------
