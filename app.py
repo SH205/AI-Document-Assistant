@@ -244,105 +244,53 @@ with tab1:
             use_container_width=True
         )
     
-    if quick_question:
-
-        if st.session_state.pipeline is None:
-            st.warning("Please upload at least one PDF.")
-            st.stop()
+    if summarize:
+        question = "Summarize the uploaded documents."
     
-        st.session_state.messages.append(
-            {
-                "role": "user",
-                "content": quick_question
-            }
-        )
+    elif key_points:
+        question = "What are the most important points from the uploaded documents?"
     
-        with st.status("Searching knowledge base...", expanded=True) as status:
+    elif explain:
+        question = "Explain the main concepts from the uploaded documents."
     
-            status.write("🔎 Searching vector database...")
-    
-            answer, sources = st.session_state.pipeline.ask(quick_question)
-    
-            status.write("🧠 Generating response...")
-    
-            status.update(label="Complete", state="complete")
-    
-        grouped_sources = {}
-    
-        for source in sources:
-            grouped_sources.setdefault(
-                source["filename"],
-                []
-            ).append(source["page"])
-    
-        source_html = ""
-    
-        for filename, pages in grouped_sources.items():
-    
-            pages = sorted(set(pages))
-    
-            source_html += f"""
-    <div class="chat-source">
-    <div class="source-title">📄 {filename}</div>
-    Pages: {", ".join(map(str, pages))}
-    </div>
-    """
-    
-        final_answer = f"""
-    <div class="answer-box">
-    
-    {answer}
-    
-    </div>
-    
-    {source_html}
-    """
-    
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": final_answer
-            }
-        )
-    
-        st.rerun()
-
-
-    # ---------------------------------------------------
-    # Conversation
-    # ---------------------------------------------------    
-    st.subheader("💬 Chat")
-
-    if len(st.session_state.messages) == 0:
-        st.info( "Ask a question or use one of the quick actions above.")
-
+   
 # ---------------------------------------------------
-# Message
+# Chat
 # ---------------------------------------------------
 
-chat_container = st.container()
+st.subheader("💬 Chat")
 
-with chat_container:
-    # Display Chat History
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
+if len(st.session_state.messages) == 0:
+    st.info("Ask a question or use one of the quick actions above.")
 
-            st.markdown(
-                message["content"],
-                unsafe_allow_html=True)
+for message in st.session_state.messages:
+
+    with st.chat_message(message["role"]):
+
+        st.markdown(
+            message["content"],
+            unsafe_allow_html=True
+        )
+
+
 # ---------------------------------------------------
 # Question Input
 # ---------------------------------------------------
 
 question = st.chat_input(
     "Ask a question about your uploaded documents..."
-)       
+)
+
+
+# ---------------------------------------------------
+# Process Question
+# ---------------------------------------------------
 
 if question:
 
     if st.session_state.pipeline is None:
 
-        st.warning("Please upload a PDF first.")
+        st.warning("Please upload at least one PDF.")
         st.stop()
 
     # Save user message
@@ -371,9 +319,9 @@ if question:
             state="complete"
         )
 
-    # -----------------------------
-    # Build Sources
-    # -----------------------------
+    # ---------------------------------------------------
+    # Group Sources
+    # ---------------------------------------------------
 
     grouped_sources = {}
 
@@ -386,15 +334,17 @@ if question:
 
     source_html = ""
 
-    for filename, pages in grouped_sources.items():
+    if grouped_sources:
 
-        pages = sorted(set(pages))
+        for filename, pages in grouped_sources.items():
 
-        page_text = ", ".join(
-            map(str, pages)
-        )
+            pages = sorted(set(pages))
 
-        source_html += f"""
+            page_text = ", ".join(
+                map(str, pages)
+            )
+
+            source_html += f"""
 <div class="chat-source">
     <div class="source-title">
         📄 {filename}
@@ -403,6 +353,10 @@ if question:
     Pages: {page_text}
 </div>
 """
+
+    # ---------------------------------------------------
+    # Assistant Response
+    # ---------------------------------------------------
 
     final_answer = f"""
 <div class="answer-box">
@@ -414,7 +368,6 @@ if question:
 {source_html}
 """
 
-    # Save assistant response
     st.session_state.messages.append(
         {
             "role": "assistant",
@@ -422,8 +375,7 @@ if question:
         }
     )
 
-    # Force a rerun so the updated conversation is
-    # displayed above the fixed chat input.
+    # Refresh page to show new messages
     st.rerun()
 
 
